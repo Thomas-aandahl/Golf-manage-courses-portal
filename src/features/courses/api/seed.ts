@@ -1,0 +1,121 @@
+import type { StoredCourse } from "./storage";
+
+const seedImage = (file: string) => ({ source: "static", url: `${import.meta.env.BASE_URL}seed/${file}` }) as const;
+
+type SeedRow = Omit<StoredCourse, "updatedAt" | "teeLengthMen" | "teeLengthWomen"> &
+  Partial<Pick<StoredCourse, "teeLengthMen" | "teeLengthWomen">>;
+
+// Two featured courses so the ordering rule is visible on first load, and a few without images
+// (placeholder) or with long names (truncation).
+const rows: SeedRow[] = [
+  {
+    id: "pebble-beach",
+    name: "Pebble Beach Golf Links",
+    city: "California",
+    country: "US",
+    par: 72,
+    difficulty: 4,
+    teeLengthMen: 5592,
+    teeLengthWomen: 4800,
+    featured: true,
+    featuredAt: "2026-02-01T10:00:00.000Z",
+    createdAt: "2026-01-05T10:00:00.000Z",
+    image: seedImage("pebble-beach.jpg"),
+  },
+  {
+    id: "st-andrews",
+    name: "St. Andrews",
+    city: "Fife",
+    country: "GB",
+    par: 72,
+    difficulty: 2,
+    teeLengthMen: 6721,
+    teeLengthWomen: 5452,
+    featured: true,
+    featuredAt: "2026-03-01T10:00:00.000Z",
+    createdAt: "2026-01-02T10:00:00.000Z",
+    image: seedImage("st-andrews.jpg"),
+  },
+  {
+    id: "albany",
+    name: "Albany",
+    city: "New Providence",
+    country: "BS",
+    par: 72,
+    difficulty: 4,
+    featured: false,
+    featuredAt: null,
+    createdAt: "2026-04-10T10:00:00.000Z",
+    image: seedImage("albany.jpg"),
+  },
+  {
+    id: "hidden-canyon",
+    name: "Hidden Canyon",
+    city: "California",
+    country: "US",
+    par: 72,
+    difficulty: 4,
+    teeLengthMen: 6340,
+    teeLengthWomen: 5120,
+    featured: false,
+    featuredAt: null,
+    createdAt: "2026-04-08T10:00:00.000Z",
+    image: seedImage("hidden-canyon.jpg"),
+  },
+  {
+    id: "skagen-links",
+    name: "Skagen Links",
+    city: "Skagen",
+    country: "DK",
+    par: 71,
+    difficulty: 3,
+    featured: false,
+    featuredAt: null,
+    createdAt: "2026-04-01T10:00:00.000Z",
+    image: seedImage("skagen-links.jpg"),
+  },
+  {
+    id: "valderrama",
+    name: "Real Club Valderrama – Championship Course at Sotogrande",
+    city: "San Roque, Andalusia",
+    country: "ES",
+    par: 71,
+    difficulty: 5,
+    featured: false,
+    featuredAt: null,
+    createdAt: "2026-03-20T10:00:00.000Z",
+    image: null,
+  },
+  {
+    id: "royal-copenhagen",
+    name: "Royal Copenhagen Golf Club",
+    city: "Klampenborg",
+    country: "DK",
+    par: 71,
+    difficulty: 3,
+    featured: false,
+    featuredAt: null,
+    createdAt: "2026-03-12T10:00:00.000Z",
+    image: null,
+  },
+  {
+    id: "kawana",
+    name: "Kawana Hotel Fuji Course",
+    city: "Shizuoka",
+    country: "JP",
+    par: 72,
+    difficulty: 3,
+    featured: false,
+    featuredAt: null,
+    createdAt: "2026-02-15T10:00:00.000Z",
+    image: null,
+  },
+];
+
+export const seedCourses = (): StoredCourse[] =>
+  rows.map((row) => ({
+    teeLengthMen: null,
+    teeLengthWomen: null,
+    updatedAt: row.createdAt,
+    ...row,
+  }));

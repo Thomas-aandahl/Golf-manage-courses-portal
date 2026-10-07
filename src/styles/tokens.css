@@ -1,0 +1,48 @@
+/* Design tokens from Figma (see docs/design-spec.md). */
+:root {
+  --color-brand: #ec691a;
+  --color-brand-hover: #d65c12;
+  --color-danger: #ee1b34;
+  --color-danger-hover: #d4142b;
+  --color-bg-black: #222222;
+  --color-text: #414141;
+  --color-text-muted: #7b7b7b;
+  --color-gray: #a0a0a0;
+  --color-light-gray: #e0e0e0;
+  --color-lighter-gray: #f5f5f5;
+  --color-white: #ffffff;
+  --color-focus: #ec691a;
+
+  --font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --text-h1: 700 22px/30.8px var(--font-family);
+  --text-h2: 600 15px/21px var(--font-family);
+  --text-body: 400 13px/18.2px var(--font-family);
+  --text-body-bold: 600 13px/18.2px var(--font-family);
+  --text-button: 600 13px/16px var(--font-family);
+  --text-label: 400 11px/15.4px var(--font-family);
+  --text-trumpet: 700 11px/10px var(--font-family);
+  --tracking-trumpet: 2px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+
+  --shadow-soft: 0 5px 15px rgb(0 0 0 / 10%);
+
+  --page-gutter: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  :root {
+    --page-gutter: var(--space-10);
+  }
+}
