@@ -1,5 +1,6 @@
 import { Link, Outlet } from "react-router-dom";
 import styles from "./AppShell.module.css";
+import { DevPanel } from "./DevPanel";
 
 export function AppShell() {
   return (
@@ -23,6 +24,7 @@ export function AppShell() {
       <main id="main" className={styles.main}>
         <Outlet />
       </main>
+      <DevPanel />
     </>
   );
 }

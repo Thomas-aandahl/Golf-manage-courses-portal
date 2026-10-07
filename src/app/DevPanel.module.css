@@ -1,0 +1,73 @@
+/* Bottom-left so it never covers the toasts (bottom-right). Below the dialog overlay (z-index 30). */
+.panel {
+  position: fixed;
+  bottom: var(--space-4);
+  left: var(--space-4);
+  z-index: 25;
+  max-width: 220px;
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+  color: var(--color-text);
+  font: var(--text-label);
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* display: flex drops the native marker, so draw a small disclosure caret. */
+.summary::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 5px solid var(--color-gray);
+  transition: transform 120ms ease;
+}
+
+.panel[open] .summary::before {
+  transform: rotate(90deg);
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.badge {
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-sm);
+  background: var(--color-danger);
+  color: var(--color-white);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+.hint {
+  color: var(--color-text-muted);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.option input {
+  margin: 0;
+  accent-color: var(--color-brand);
+}

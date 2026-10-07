@@ -1,0 +1,116 @@
+/* Shared by TextField and SelectField: 48px white box with a floating label (Figma "Input"). */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.box {
+  position: relative;
+}
+
+.control {
+  display: block;
+  width: 100%;
+  height: 48px;
+  margin: 0;
+  padding: 20px var(--space-3) 6px;
+  border: 1px solid var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  background: var(--color-white);
+  color: var(--color-text);
+  font: var(--text-body);
+  appearance: none;
+}
+
+/* A 1px border change alone is too subtle to count as a visible focus indicator: thicken it. */
+.control:focus,
+.control:focus-visible {
+  outline: none;
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 1px var(--color-brand);
+}
+
+.control[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+.control[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 1px var(--color-danger);
+}
+
+/* The label sits where a placeholder would and moves to the top once the field has focus or a value. */
+.label {
+  position: absolute;
+  top: 50%;
+  left: var(--space-3);
+  right: var(--space-3);
+  overflow: hidden;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font: var(--text-body);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.box:has(.control:focus, .control:not(:placeholder-shown)) .label,
+.floating .label {
+  top: 7px;
+  transform: none;
+  font: var(--text-label);
+}
+
+.select {
+  padding-right: var(--space-10);
+  cursor: pointer;
+}
+
+/* "Choose an option" reads as a placeholder. */
+.select:has(option[value=""]:checked) {
+  color: var(--color-gray);
+}
+
+.select option {
+  color: var(--color-text);
+}
+
+.chevron {
+  position: absolute;
+  top: 50%;
+  right: var(--space-3);
+  transform: translateY(-50%);
+  color: var(--color-text);
+  pointer-events: none;
+}
+
+.hint,
+.error {
+  font: var(--text-label);
+}
+
+.hint {
+  color: var(--color-text-muted);
+}
+
+.error {
+  color: var(--color-danger);
+}
+
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  align-self: flex-start;
+  font: var(--text-body);
+  cursor: pointer;
+}
+
+.checkbox input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--color-brand);
+  cursor: pointer;
+}

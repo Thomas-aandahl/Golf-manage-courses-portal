@@ -1,0 +1,96 @@
+/* Mobile first: one column, preview after the fields. */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-10);
+  padding: var(--space-8) var(--page-gutter) var(--space-10);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  min-width: 0;
+}
+
+/* 32px between rows; heading-to-content is 24px, as in Figma. */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.section > .heading,
+.sectionHeader {
+  margin-bottom: calc(var(--space-6) - var(--space-8));
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.heading {
+  font: var(--text-h2);
+}
+
+.explainer {
+  color: var(--color-text-muted);
+  font: var(--text-body);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-8);
+}
+
+@media (min-width: 640px) {
+  .row {
+    grid-template-columns: repeat(2, minmax(0, 312px));
+  }
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.previewLabel {
+  color: var(--color-gray);
+  font: var(--text-trumpet);
+  letter-spacing: var(--tracking-trumpet);
+  text-transform: uppercase;
+}
+
+.previewCard {
+  width: 100%;
+  max-width: 304px;
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 814px) minmax(352px, 1fr);
+    align-items: start;
+    gap: 0;
+    padding: 0;
+  }
+
+  .form {
+    padding: var(--space-10);
+  }
+
+  .preview {
+    position: sticky;
+    top: var(--space-6);
+    padding: var(--space-10) var(--space-6);
+  }
+
+  .previewCard {
+    width: 304px;
+  }
+}
