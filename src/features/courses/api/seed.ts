@@ -2,11 +2,11 @@ import type { StoredCourse } from "./storage";
 
 const seedImage = (file: string) => ({ source: "static", url: `${import.meta.env.BASE_URL}seed/${file}` }) as const;
 
-type SeedRow = Omit<StoredCourse, "updatedAt" | "teeLengthMen" | "teeLengthWomen"> &
-  Partial<Pick<StoredCourse, "teeLengthMen" | "teeLengthWomen">>;
+type SeedRow = Omit<StoredCourse, "updatedAt" | "image">;
 
-// Two featured courses so the ordering rule is visible on first load, and a few without images
-// (placeholder) or with long names (truncation).
+// Two featured courses so the ordering rule is visible on first load, and one long name to show truncation.
+// Tee lengths are approximate (metres, back men's tee / forward women's tee). Each image is `public/seed/{id}.jpg`.
+// Bump COURSES_KEY in storage.ts after editing, or existing browsers keep the old seed.
 const rows: SeedRow[] = [
   {
     id: "pebble-beach",
@@ -20,7 +20,6 @@ const rows: SeedRow[] = [
     featured: true,
     featuredAt: "2026-02-01T10:00:00.000Z",
     createdAt: "2026-01-05T10:00:00.000Z",
-    image: seedImage("pebble-beach.jpg"),
   },
   {
     id: "st-andrews",
@@ -34,7 +33,6 @@ const rows: SeedRow[] = [
     featured: true,
     featuredAt: "2026-03-01T10:00:00.000Z",
     createdAt: "2026-01-02T10:00:00.000Z",
-    image: seedImage("st-andrews.jpg"),
   },
   {
     id: "albany",
@@ -43,10 +41,11 @@ const rows: SeedRow[] = [
     country: "BS",
     par: 72,
     difficulty: 4,
+    teeLengthMen: 6677,
+    teeLengthWomen: 5121,
     featured: false,
     featuredAt: null,
     createdAt: "2026-04-10T10:00:00.000Z",
-    image: seedImage("albany.jpg"),
   },
   {
     id: "hidden-canyon",
@@ -60,19 +59,19 @@ const rows: SeedRow[] = [
     featured: false,
     featuredAt: null,
     createdAt: "2026-04-08T10:00:00.000Z",
-    image: seedImage("hidden-canyon.jpg"),
   },
   {
-    id: "skagen-links",
-    name: "Skagen Links",
-    city: "Skagen",
-    country: "DK",
-    par: 71,
+    id: "kawana-oshima",
+    name: "Kawana Hotel Oshima Course",
+    city: "Shizuoka",
+    country: "JP",
+    par: 70,
     difficulty: 3,
+    teeLengthMen: 5222,
+    teeLengthWomen: 4510,
     featured: false,
     featuredAt: null,
     createdAt: "2026-04-01T10:00:00.000Z",
-    image: seedImage("skagen-links.jpg"),
   },
   {
     id: "valderrama",
@@ -81,22 +80,24 @@ const rows: SeedRow[] = [
     country: "ES",
     par: 71,
     difficulty: 5,
+    teeLengthMen: 6356,
+    teeLengthWomen: 5210,
     featured: false,
     featuredAt: null,
     createdAt: "2026-03-20T10:00:00.000Z",
-    image: null,
   },
   {
-    id: "Rungsted",
+    id: "rungsted",
     name: "Rungsted Golfclub",
     city: "Rungsted",
     country: "DK",
     par: 72,
     difficulty: 2,
+    teeLengthMen: 5902,
+    teeLengthWomen: 4995,
     featured: false,
     featuredAt: null,
     createdAt: "2026-03-12T10:00:00.000Z",
-    image: null,
   },
   {
     id: "kawana",
@@ -105,17 +106,13 @@ const rows: SeedRow[] = [
     country: "JP",
     par: 72,
     difficulty: 3,
+    teeLengthMen: 5950,
+    teeLengthWomen: 4980,
     featured: false,
     featuredAt: null,
     createdAt: "2026-02-15T10:00:00.000Z",
-    image: null,
   },
 ];
 
 export const seedCourses = (): StoredCourse[] =>
-  rows.map((row) => ({
-    teeLengthMen: null,
-    teeLengthWomen: null,
-    updatedAt: row.createdAt,
-    ...row,
-  }));
+  rows.map((row) => ({ ...row, image: seedImage(`${row.id}.jpg`), updatedAt: row.createdAt }));

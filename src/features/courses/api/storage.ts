@@ -19,7 +19,8 @@ export type ImageStore = {
   remove(id: string): Promise<void>;
 };
 
-const COURSES_KEY = "golf-portal:courses:v1";
+// Bump the version when the seed data or stored shape changes, so browsers pick up the new seed.
+const COURSES_KEY = "golf-portal:courses:v4";
 
 export function createLocalStorageCourseStore(): CourseStore {
   return {
