@@ -65,8 +65,8 @@ To start from the seed data again, clear site data in DevTools.
 
 **Skills used:**
 - `/frontend-design`: Claude skill for visual design guidance.
-- `/code-review`: public skill from GitHub, used to review my code at the end of the project.
-- `/code-simplification`: public skill from GitHub, used to simplify over-engineered code and improve readability.
+- `/code-review`: Claude skill, used to review my code at the end of the project.
+- `/code-simplification`: Public skill from GitHub, used to simplify over-engineered code and improve readability.
 
 **How I set it up:**
 - [`CLAUDE.md`](CLAUDE.md) with the stack, folder structure and rules (all data access through `api/`, one Zod schema,
