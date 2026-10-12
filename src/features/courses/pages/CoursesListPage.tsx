@@ -19,6 +19,7 @@ export function CoursesListPage() {
   const createLinkRef = useRef<HTMLAnchorElement>(null);
   const menuTriggerRef = useRef<HTMLElement | null>(null);
 
+  // Data is checked before error: if a background refetch fails, the list stays (with a notice in the toolbar).
   let content: ReactNode;
   if (courses) {
     content =

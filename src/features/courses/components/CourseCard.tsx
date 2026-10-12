@@ -55,6 +55,7 @@ export function CourseCard({
   const difficultyText = difficulty ? `${difficulty}/5` : "–/5";
 
   return (
+    // data-has-tees enables the hover swap in CSS: difficulty moves up and the tee lengths take its place.
     <article className={styles.card} data-has-tees={tees ? "" : undefined}>
       <div className={styles.media}>
         <CourseImage src={imageUrl ?? null} />

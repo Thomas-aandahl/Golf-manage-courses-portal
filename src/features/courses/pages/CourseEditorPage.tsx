@@ -35,6 +35,7 @@ export function CourseEditorPage() {
 function CreateCourse() {
   const createCourse = useCreateCourse();
 
+  // mutateAsync, not mutate: the form awaits the save and only then navigates home.
   return (
     <EditorShell title="Create course" saving={createCourse.isPending} canSave>
       <CourseForm id={FORM_ID} defaultValues={EMPTY_VALUES} onSubmit={createCourse.mutateAsync} />

@@ -38,6 +38,7 @@ export function CourseForm({ id, defaultValues, initialImageUrl = null, onSubmit
     formState: { errors, isSubmitting },
   } = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema),
+    // Validate a field when it is first left, then on every change, so errors don't appear mid-typing.
     mode: "onTouched",
     defaultValues,
   });
@@ -165,6 +166,7 @@ export function CourseForm({ id, defaultValues, initialImageUrl = null, onSubmit
           <h3 id={`${id}-image`} className={styles.heading}>
             Image
           </h3>
+          {/* Controller rather than register(): the dropzone is a custom component, not a native input. */}
           <Controller
             name="image"
             control={control}

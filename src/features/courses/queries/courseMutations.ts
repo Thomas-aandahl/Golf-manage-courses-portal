@@ -69,6 +69,7 @@ export function useDeleteCourse() {
       toast.success(`"${course.name}" was deleted`);
     },
 
+    // Success or failure, refetch so the cache ends up matching the server.
     onSettled: () => queryClient.invalidateQueries({ queryKey: courseKeys.list() }),
   });
 }

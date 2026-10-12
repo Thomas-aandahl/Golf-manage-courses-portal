@@ -6,7 +6,9 @@ import { RouteError } from "./RouteError";
 export const router = createBrowserRouter([
   {
     element: <AppShell />,
+    // Catches errors thrown while rendering or lazy-loading any child route.
     errorElement: <RouteError />,
+    // Shown while the first lazy route loads. It is quick, so a spinner would only flash.
     hydrateFallbackElement: null,
     children: [
       {
@@ -27,6 +29,7 @@ export const router = createBrowserRouter([
           Component: (await import("../features/courses/pages/CourseEditorPage")).CourseEditorPage,
         }),
       },
+      // Any other URL.
       { path: "*", element: <RouteError notFound /> },
     ],
   },

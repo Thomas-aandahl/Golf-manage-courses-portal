@@ -44,12 +44,14 @@ export function createMockCourseService({
     const [min, max] = latencyMs;
     const ms = min + Math.random() * (max - min);
     if (ms > 0) await new Promise((resolve) => setTimeout(resolve, ms));
+    // Fail after the delay, so the loading state (and the optimistic delete) is visible before the error.
     if (failures()[operation]) throw new ApiError("SERVER_ERROR", FAILURE_MESSAGES[operation]);
   }
 
   function readAll(): StoredCourse[] {
     const stored = courseStore.load();
     if (stored) return stored;
+    // First visit, or storage was cleared: start from the seed data.
     const seeded = seedCourses();
     courseStore.save(seeded);
     return seeded;
@@ -127,6 +129,7 @@ export function createMockCourseService({
 
       let nextImage = existing.image;
       if (image) {
+        // Save the new image before deleting the old one, so a failed save never leaves the course without one.
         nextImage = await saveImage(image);
         await deleteImage(existing.image);
       }

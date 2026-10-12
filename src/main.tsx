@@ -1,3 +1,4 @@
+// Self-hosted Inter, bundled by Vite: no request to Google Fonts.
 import "@fontsource-variable/inter";
 import "./styles/global.css";
 import { StrictMode } from "react";

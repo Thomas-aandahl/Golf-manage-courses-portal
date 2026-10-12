@@ -10,6 +10,7 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 export function Button({
   variant = "primary",
   loading = false,
+  // A <button> inside a form defaults to "submit"; make that opt-in so icon buttons never submit by accident.
   type = "button",
   className,
   children,

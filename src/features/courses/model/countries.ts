@@ -21,4 +21,5 @@ export const COUNTRIES = [
 
 export type CountryCode = (typeof COUNTRIES)[number]["code"];
 
+// z.enum() needs a non-empty tuple type, which .map() can't express on its own.
 export const COUNTRY_CODES = COUNTRIES.map((c) => c.code) as [CountryCode, ...CountryCode[]];
