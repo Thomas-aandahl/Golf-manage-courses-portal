@@ -12,6 +12,7 @@
   --color-lighter-gray: #f5f5f5;
   --color-white: #ffffff;
   --color-focus: #ec691a;
+  --color-overlay: rgb(0 0 0 / 40%);
 
   --font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
 
