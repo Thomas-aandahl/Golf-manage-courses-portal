@@ -9,7 +9,8 @@ export const router = createBrowserRouter([
     // Catches errors thrown while rendering or lazy-loading any child route.
     errorElement: <RouteError />,
     // Shown while the first lazy route loads. It is quick, so a spinner would only flash.
-    hydrateFallbackElement: null,
+    // An empty element rather than null: React Router treats null as "not provided" and warns.
+    hydrateFallbackElement: <div aria-busy="true" />,
     children: [
       {
         index: true,
