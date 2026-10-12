@@ -70,4 +70,43 @@ describe("mock course service", () => {
     await expect(service.remove(course.id)).rejects.toBeInstanceOf(ApiError);
     expect(names(await service.list())).toEqual(["keep me"]);
   });
+
+  it("keeps the old image when writing the updated course fails", async () => {
+    // jsdom has no object URLs; the service only needs a string back.
+    const originalCreateObjectURL = URL.createObjectURL;
+    URL.createObjectURL = () => "blob:test";
+    try {
+      const memory = createMemoryCourseStore([]);
+      let failWrites = false;
+      const images = createMemoryImageStore();
+      let nextId = 0;
+      const service = createMockCourseService({
+        courseStore: {
+          load: memory.load,
+          save: (courses) => {
+            if (failWrites) throw new Error("QuotaExceededError");
+            memory.save(courses);
+          },
+        },
+        imageStore: images,
+        latencyMs: [0, 0],
+        failures: () => ({ load: false, save: false, delete: false }),
+        createId: () => `id-${++nextId}`,
+      });
+
+      const oldFile = new File(["old"], "old.png", { type: "image/png" });
+      const course = await service.create(input({ image: oldFile }));
+      const oldImage = memory.load()?.[0]?.image;
+
+      failWrites = true;
+      const newFile = new File(["new"], "new.png", { type: "image/png" });
+      await expect(service.update(course.id, input({ image: newFile }))).rejects.toThrow("QuotaExceededError");
+
+      // The record still points at the old image, and that image still exists.
+      expect(memory.load()?.[0]?.image).toEqual(oldImage);
+      expect(oldImage?.source === "idb" && (await images.get(oldImage.id))).toBeTruthy();
+    } finally {
+      URL.createObjectURL = originalCreateObjectURL;
+    }
+  });
 });

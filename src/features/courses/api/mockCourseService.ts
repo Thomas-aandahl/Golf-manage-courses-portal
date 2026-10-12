@@ -1,4 +1,4 @@
-﻿import { resolveFeaturedAt } from "../model/featured";
+import { resolveFeaturedAt } from "../model/featured";
 import { sortCourses } from "../model/sortCourses";
 import type { Course, CourseInput } from "../model/types";
 import { ApiError, type CourseService } from "./courseService";
@@ -38,7 +38,8 @@ export function createMockCourseService({
   createId = () => crypto.randomUUID(),
 }: Options = {}): CourseService {
   // One object URL per stored image for the lifetime of the page; revoked when the image is replaced or deleted.
-  const objectUrls = new Map<string, string>();
+  // The promise is cached (not the URL) so two overlapping reads of the same image share one URL.
+  const objectUrls = new Map<string, Promise<string | null>>();
 
   async function simulateNetwork(operation: FailureKey) {
     const [min, max] = latencyMs;
@@ -67,12 +68,12 @@ export function createMockCourseService({
     if (!image) return null;
     if (image.source === "static") return image.url;
 
-    const cached = objectUrls.get(image.id);
-    if (cached) return cached;
-    const blob = await imageStore.get(image.id);
-    if (!blob) return null; // Storage was cleared: fall back to the placeholder.
-    const url = URL.createObjectURL(blob);
-    objectUrls.set(image.id, url);
+    let url = objectUrls.get(image.id);
+    if (!url) {
+      // Storage was cleared: null falls back to the placeholder.
+      url = imageStore.get(image.id).then((blob) => (blob ? URL.createObjectURL(blob) : null));
+      objectUrls.set(image.id, url);
+    }
     return url;
   }
 
@@ -85,9 +86,19 @@ export function createMockCourseService({
   async function deleteImage(image: StoredImage | null) {
     if (image?.source !== "idb") return;
     await imageStore.remove(image.id);
-    const url = objectUrls.get(image.id);
+    const url = await objectUrls.get(image.id);
     if (url) URL.revokeObjectURL(url);
     objectUrls.delete(image.id);
+  }
+
+  /** Writes the course list; if that fails, removes the image that was stored for it so it isn't orphaned. */
+  async function saveCourses(courses: StoredCourse[], newImage: StoredImage | null) {
+    try {
+      courseStore.save(courses);
+    } catch (error) {
+      await deleteImage(newImage);
+      throw error;
+    }
   }
 
   async function toCourse({ image, ...rest }: StoredCourse): Promise<Course> {
@@ -109,15 +120,16 @@ export function createMockCourseService({
     async create({ image, ...fields }: CourseInput) {
       await simulateNetwork("save");
       const timestamp = now().toISOString();
+      const newImage = image ? await saveImage(image) : null;
       const created: StoredCourse = {
         ...fields,
         id: createId(),
-        image: image ? await saveImage(image) : null,
+        image: newImage,
         featuredAt: resolveFeaturedAt(null, fields.featured, timestamp),
         createdAt: timestamp,
         updatedAt: timestamp,
       };
-      courseStore.save([...readAll(), created]);
+      await saveCourses([...readAll(), created], newImage);
       return toCourse(created);
     },
 
@@ -127,21 +139,20 @@ export function createMockCourseService({
       const existing = findOrThrow(courses, id);
       const timestamp = now().toISOString();
 
-      let nextImage = existing.image;
-      if (image) {
-        // Save the new image before deleting the old one, so a failed save never leaves the course without one.
-        nextImage = await saveImage(image);
-        await deleteImage(existing.image);
-      }
-
+      const newImage = image ? await saveImage(image) : null;
       const updated: StoredCourse = {
         ...existing,
         ...fields,
-        image: nextImage,
+        image: newImage ?? existing.image,
         featuredAt: resolveFeaturedAt(existing, fields.featured, timestamp),
         updatedAt: timestamp,
       };
-      courseStore.save(courses.map((c) => (c.id === id ? updated : c)));
+      await saveCourses(
+        courses.map((c) => (c.id === id ? updated : c)),
+        newImage,
+      );
+      // Only now that the record points at the new image is the old one safe to delete.
+      if (newImage) await deleteImage(existing.image);
       return toCourse(updated);
     },
 
