@@ -8,11 +8,11 @@ React 19, Vite, TypeScript (strict), React Router (lazy routes), TanStack Query,
 Radix primitives (DropdownMenu, Dialog), CSS Modules, Vitest + Testing Library, Playwright.
 
 ## Commands
-- `npm run dev` – dev server
-- `npm run typecheck` – `tsc -b`
-- `npm run lint` – ESLint
-- `npm run test:run` – Vitest once (use `npm test` for watch)
-- `npm run e2e` – Playwright
+- `npm run dev`: dev server
+- `npm run typecheck`: `tsc -b`
+- `npm run lint`: ESLint
+- `npm run test:run`: Vitest once (use `npm test` for watch)
+- `npm run e2e`: Playwright
 
 Run `typecheck`, `lint` and `test:run` before calling a task done.
 
@@ -21,8 +21,8 @@ Run `typecheck`, `lint` and `test:run` before calling a task done.
 src/
   app/                 shell, router, providers
   features/courses/
-    model/             types, Zod schema, pure domain logic (sortCourses) – no React
-    api/               service interface + mock implementation – no React
+    model/             types, Zod schema, pure domain logic (sortCourses), no React
+    api/               service interface + mock implementation, no React
     queries/           React Query keys, hooks, mutations
     components/        CourseCard, CourseMenu, DeleteCourseDialog, ...
     pages/             route components (lazy-loaded)

@@ -47,7 +47,7 @@ test("create a featured course, see it persist, then delete it", async ({ page }
   // The uploaded image survives a reload (stored in IndexedDB, shown via an object URL).
   await page.reload();
   await expect(courseNames(page).nth(2)).toHaveText(name);
-  // The image is decorative (alt=""), so it has no img role – query the element.
+  // The image is decorative (alt=""), so it has no img role. Query the element instead.
   await expect(card(page, name).locator("img")).toHaveAttribute("src", /^blob:/);
 
   // Delete

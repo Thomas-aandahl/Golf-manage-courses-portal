@@ -105,7 +105,7 @@ describe("useDeleteCourse", () => {
 
     await act(async () => deleteB.reject(new Error("Server error")));
 
-    // b comes back; c, still being deleted, does not – and the list is not refetched while c is in flight.
+    // b comes back; c, still being deleted, does not, and the list is not refetched while c is in flight.
     await waitFor(() => expect(listIds()).toEqual(["a", "b"]));
     expect(isInvalidated()).toBe(false);
 

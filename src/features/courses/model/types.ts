@@ -1,6 +1,6 @@
 import type { CourseFormValues } from "./courseSchema";
 
-/** A course as the app sees it – the shape a real API would return. */
+/** A course as the app sees it, in the shape a real API would return. */
 export type Course = Omit<CourseFormValues, "image"> & {
   id: string;
   imageUrl: string | null;

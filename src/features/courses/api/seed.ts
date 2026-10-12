@@ -75,7 +75,7 @@ const rows: SeedRow[] = [
   },
   {
     id: "valderrama",
-    name: "Real Club Valderrama – Championship Course at Sotogrande",
+    name: "Real Club Valderrama Championship Course at Sotogrande",
     city: "San Roque, Andalusia",
     country: "ES",
     par: 71,

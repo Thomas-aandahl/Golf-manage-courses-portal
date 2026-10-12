@@ -23,6 +23,12 @@ dist-ssr
 *.sln
 *.sw?
 
+# Test coverage
+coverage/
+
+# Claude Code: personal settings (the shared .claude/settings.json is committed)
+.claude/settings.local.json
+
 # Playwright
 test-results/
 playwright-report/

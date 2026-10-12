@@ -99,7 +99,7 @@ export function ImageDropzone({ file, fileUrl, currentImageUrl, onSelect, error,
           <UploadIcon size={32} className={styles.icon} />
           <span className={styles.title}>Drag &amp; Drop</span>
           <span id={hintId} className={styles.hint}>
-            Drag &amp; drop or click to browse — JPG, PNG or WebP, max 10 MB
+            Drag &amp; drop or click to browse (JPG, PNG or WebP, max 10 MB)
           </span>
         </button>
       )}

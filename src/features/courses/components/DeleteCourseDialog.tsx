@@ -10,7 +10,7 @@ type DeleteCourseDialogProps = {
   /** The course to confirm; `null` closes the dialog. */
   course: Pick<Course, "id" | "name"> | null;
   onClose: () => void;
-  /** Focus target after Cancel/Escape/✕ – the menu trigger that opened the dialog. */
+  /** Focus target after Cancel/Escape/✕: the menu trigger that opened the dialog. */
   returnFocusRef: RefObject<HTMLElement | null>;
   /** Focus target after a confirmed delete, since the card and its menu trigger are gone. */
   focusAfterDeleteRef: RefObject<HTMLElement | null>;

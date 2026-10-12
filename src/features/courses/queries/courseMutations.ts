@@ -63,7 +63,7 @@ export function useDeleteCourse() {
     },
 
     onError: (_error, course, onMutateResult) => {
-      // Put back only this course – not a whole-list snapshot, which would also undo other deletes
+      // Put back only this course, not a whole-list snapshot, which would also undo other deletes
       // that happened meanwhile. sortCourses gives it the same position it had before.
       const removed = onMutateResult?.removed;
       if (removed) {
@@ -79,7 +79,7 @@ export function useDeleteCourse() {
       toast.success(`"${course.name}" was deleted`);
     },
 
-    // Refetch so the cache ends up matching the server – but only when the last delete settles,
+    // Refetch so the cache ends up matching the server, but only when the last delete settles,
     // otherwise the refetch could bring back a card whose delete is still in flight.
     onSettled: () => {
       if (queryClient.isMutating({ mutationKey: deleteMutationKey }) === 1) {
