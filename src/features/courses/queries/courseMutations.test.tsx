@@ -13,7 +13,7 @@ const service = vi.hoisted(() => ({
 }));
 vi.mock("../api", () => ({ courseService: service }));
 
-const course = (id: string): Course => ({
+const course = (id: string, createdAt: string): Course => ({
   id,
   name: id,
   city: "Copenhagen",
@@ -25,11 +25,15 @@ const course = (id: string): Course => ({
   featured: false,
   featuredAt: null,
   imageUrl: null,
-  createdAt: "2026-01-01T00:00:00.000Z",
-  updatedAt: "2026-01-01T00:00:00.000Z",
+  createdAt,
+  updatedAt: createdAt,
 });
 
-const initialList = [course("a"), course("b"), course("c")];
+// Newest first, so this is also the order sortCourses produces.
+const a = course("a", "2026-03-01T00:00:00.000Z");
+const b = course("b", "2026-02-01T00:00:00.000Z");
+const c = course("c", "2026-01-01T00:00:00.000Z");
+const initialList = [a, b, c];
 
 function setup() {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -39,7 +43,8 @@ function setup() {
   );
   const { result } = renderHook(() => useDeleteCourse(), { wrapper });
   const listIds = () => queryClient.getQueryData<Course[]>(courseKeys.list())?.map((c) => c.id);
-  return { result, listIds };
+  const isInvalidated = () => queryClient.getQueryState(courseKeys.list())?.isInvalidated;
+  return { result, listIds, isInvalidated };
 }
 
 /** A promise we resolve or reject from the test, so we can look at the cache while the request is in flight. */
@@ -78,12 +83,36 @@ describe("useDeleteCourse", () => {
 
   it("keeps the course removed when the delete succeeds", async () => {
     service.remove.mockResolvedValue(undefined);
-    service.list.mockResolvedValue([course("a"), course("c")]);
+    service.list.mockResolvedValue([a, c]);
     const { result, listIds } = setup();
 
     act(() => result.current.mutate({ id: "b", name: "b" }));
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(listIds()).toEqual(["a", "c"]);
+  });
+
+  it("restores only the failed course when two deletes overlap", async () => {
+    const deleteB = deferred();
+    const deleteC = deferred();
+    service.remove.mockImplementation((id) => (id === "b" ? deleteB.promise : deleteC.promise));
+    const { result, listIds, isInvalidated } = setup();
+
+    act(() => result.current.mutate({ id: "b", name: "b" }));
+    await waitFor(() => expect(listIds()).toEqual(["a", "c"]));
+    act(() => result.current.mutate({ id: "c", name: "c" }));
+    await waitFor(() => expect(listIds()).toEqual(["a"]));
+
+    await act(async () => deleteB.reject(new Error("Server error")));
+
+    // b comes back; c, still being deleted, does not – and the list is not refetched while c is in flight.
+    await waitFor(() => expect(listIds()).toEqual(["a", "b"]));
+    expect(isInvalidated()).toBe(false);
+
+    await act(async () => deleteC.resolve());
+
+    // The last delete to settle invalidates the list, so it is refetched from the server.
+    await waitFor(() => expect(isInvalidated()).toBe(true));
+    expect(listIds()).toEqual(["a", "b"]);
   });
 });

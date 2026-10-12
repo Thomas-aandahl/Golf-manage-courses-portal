@@ -41,26 +41,36 @@ export function useUpdateCourse(id: string) {
   });
 }
 
+const deleteMutationKey = [...courseKeys.all, "delete"] as const;
+
 /**
  * Optimistic delete: the card disappears immediately; if the request fails it is put back
- * exactly where it was and the user is told.
+ * where it belongs and the user is told. Safe with several deletes in flight at once.
  */
 export function useDeleteCourse() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: deleteMutationKey,
     mutationFn: (course: Pick<Course, "id" | "name">) => courseService.remove(course.id),
 
     onMutate: async (course) => {
       // Stop an in-flight refetch from overwriting the optimistic state with stale data.
       await queryClient.cancelQueries({ queryKey: courseKeys.list() });
-      const previous = queryClient.getQueryData<Course[]>(courseKeys.list());
+      const removed = queryClient.getQueryData<Course[]>(courseKeys.list())?.find((c) => c.id === course.id);
       queryClient.setQueryData<Course[]>(courseKeys.list(), (list) => list?.filter((c) => c.id !== course.id));
-      return { previous };
+      return { removed };
     },
 
     onError: (_error, course, onMutateResult) => {
-      if (onMutateResult?.previous) queryClient.setQueryData(courseKeys.list(), onMutateResult.previous);
+      // Put back only this course – not a whole-list snapshot, which would also undo other deletes
+      // that happened meanwhile. sortCourses gives it the same position it had before.
+      const removed = onMutateResult?.removed;
+      if (removed) {
+        queryClient.setQueryData<Course[]>(courseKeys.list(), (list) =>
+          list ? sortCourses([...list.filter((c) => c.id !== removed.id), removed]) : list,
+        );
+      }
       toast.error(`Could not delete "${course.name}". It has been restored.`);
     },
 
@@ -69,7 +79,12 @@ export function useDeleteCourse() {
       toast.success(`"${course.name}" was deleted`);
     },
 
-    // Success or failure, refetch so the cache ends up matching the server.
-    onSettled: () => queryClient.invalidateQueries({ queryKey: courseKeys.list() }),
+    // Refetch so the cache ends up matching the server – but only when the last delete settles,
+    // otherwise the refetch could bring back a card whose delete is still in flight.
+    onSettled: () => {
+      if (queryClient.isMutating({ mutationKey: deleteMutationKey }) === 1) {
+        return queryClient.invalidateQueries({ queryKey: courseKeys.list() });
+      }
+    },
   });
 }
