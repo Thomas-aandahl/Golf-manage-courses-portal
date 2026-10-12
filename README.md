@@ -32,7 +32,7 @@ To start from the seed data again, clear site data in DevTools.
 - **Delete modal** includes the course name, as the brief asks (the Figma copy is generic).
 - **Images:** JPG/PNG/WebP, max 10 MB, validated on drop with an inline error. A checkerboard placeholder is shown before upload.
 - **Breakpoints:** 1 column below 600 px, 2 from 600, 3 from 960, 4 from 1280. The editor is two columns from 1024 px.
-- **Seed data is illustrative:** five photos are the simulator renders from the Figma file, tee lengths are approximate.
+- **Seed data is illustrative:** five photos are the simulator renders from the Figma file, tee lengths are approximate or mock data.
   Other photos are credited in [docs/image-credits.md](docs/image-credits.md).
 
 ## Notable tradeoffs
@@ -43,17 +43,17 @@ To start from the seed data again, clear site data in DevTools.
 - **Explicit failure switches instead of random failures,** so the rollback can be reproduced on demand.
 - **Ordering lives in one pure function** (`sortCourses`). The mock applies it like a server would, and the client reuses it to
   place a saved course in the cache immediately; the list is then refetched so the server's version wins.
-- **Optimistic delete** cancels in-flight list fetches, snapshots the list, and restores it on error. Its toasts live in the
-  hook, because the card (and the dialog's caller) is gone before the request finishes.
+- **Optimistic delete** cancels in-flight list fetches and removes the card at once. On error it puts back only that course
+  (not a list snapshot, which would undo other deletes in flight), and the list is refetched when the last delete settles.
+  Its toasts live in the hook, because the card (and the dialog's caller) is gone before the request finishes.
 - **Radix** for the menu and dialog, rather than hand-rolled focus management. Focus returns to the menu button on cancel and
   moves to "Create a course" after a delete.
-- **Tests focus on behaviour that's easy to break:** featured ordering and `featuredAt` rules, the optimistic rollback
-  (React Query runs for real, only the service is mocked), and two Playwright flows: create → persist → delete, and a failed
-  delete rolling back.
+- **Tests focus on behaviour that's easy to break:** featured ordering and `featuredAt` rules, form validation, the optimistic
+  rollback including overlapping deletes (React Query runs for real, only the service is mocked), and two Playwright flows:
+  create → persist → delete, and a failed delete rolling back.
 
 ## With more time
 
-- Resize images in the browser before storing them, and handle a full storage quota with a specific message.
 - Warn about unsaved changes when leaving the form; allow removing an image, not just replacing it.
 - Keep the Mock API switches in sync across tabs (`storage` event).
 - More e2e coverage (validation, edit flow, mobile viewport) and an accessibility check with axe.
@@ -62,6 +62,11 @@ To start from the seed data again, clear site data in DevTools.
 ## AI usage
 
 **Tools:** Claude Code in VS Code, with the Figma MCP server and Playwright.
+
+**Skills used:**
+- `/frontend-design`: Claude skill for visual design guidance.
+- `/code-review`: public skill from GitHub, used to review my code at the end of the project.
+- `/code-simplification`: public skill from GitHub, used to simplify over-engineered code and improve readability.
 
 **How I set it up:**
 - [`CLAUDE.md`](CLAUDE.md) with the stack, folder structure and rules (all data access through `api/`, one Zod schema,
@@ -81,5 +86,9 @@ building both pages in parallel; and checking the result in a real browser with 
   missing loading fallback. Both are fixed.
 - Review and visual checks caught others: wrong heading order in the preview, a load failure that was only visible after a
   reload, and seed images that were upscaled.
+- The final `/code-review` over the whole branch found overlapping deletes undoing each other, an old image deleted before the
+  record was written, a leaked object URL, a save navigating away after the user had left the editor, and loose number
+  parsing. For the riskier fixes I first wrote a test, checked that it failed against the old code, then fixed it.
+  I deliberately kept the per-edit typecheck hook the review suggested moving to the end: it's incremental and fast.
 - I corrected the AI where it guessed: it had invented a course name for an unnamed Figma card, which I replaced with a real course.
 - Limits: the Figma MCP hit its plan's rate limit late in the project, so later design questions used the saved spec and screenshots.
