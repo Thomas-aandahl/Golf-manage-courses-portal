@@ -29,7 +29,12 @@ function Location({ city, country }: { city?: string; country?: string }) {
   );
 }
 
-function formatTees(men?: number | null, women?: number | null) {
+/** Half-typed numbers in the live preview can be NaN; the card treats them as missing. */
+function finite(value?: number | null) {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function formatTees(men?: number, women?: number) {
   const parts = [
     men != null && `M: ${metres.format(men)} m`,
     women != null && `F: ${metres.format(women)} m`,
@@ -50,9 +55,10 @@ export function CourseCard({
   actions,
   titleAs: Title = "h2",
 }: CourseCardProps) {
-  const tees = formatTees(teeLengthMen, teeLengthWomen);
-  const hasPar = typeof par === "number" && Number.isFinite(par);
-  const difficultyText = difficulty ? `${difficulty}/5` : "–/5";
+  const tees = formatTees(finite(teeLengthMen), finite(teeLengthWomen));
+  const parValue = finite(par);
+  const difficultyValue = finite(difficulty);
+  const difficultyText = difficultyValue ? `${difficultyValue}/5` : "–/5";
 
   return (
     // data-has-tees enables the hover swap in CSS: difficulty moves up and the tee lengths take its place.
@@ -79,7 +85,7 @@ export function CourseCard({
             {name?.trim() || <Placeholder>Course name</Placeholder>}
           </Title>
           <p className={styles.meta}>
-            <span>Par {hasPar ? par : "–"}</span>
+            <span>Par {parValue ?? "–"}</span>
             <span className={styles.dot} aria-hidden="true" />
             <span className={tees ? styles.defaultOnly : undefined}>Difficulty: {difficultyText}</span>
             {tees && <span className={styles.hoverOnly}>{tees}</span>}

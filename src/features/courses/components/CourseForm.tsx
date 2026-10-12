@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch, type Control, type DefaultValues } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -25,9 +25,15 @@ type CourseFormProps = {
 const DIFFICULTIES = [1, 2, 3, 4, 5];
 
 // RHF also runs setValueAs on the default value (null/undefined), not just on input strings.
-const isEmpty = (value: unknown) => value === "" || value === null || value === undefined;
-const toNumber = (value: unknown) => (isEmpty(value) ? undefined : Number(value));
-const toNumberOrNull = (value: unknown) => (isEmpty(value) ? null : Number(value));
+const isEmpty = (value: unknown) => value === null || value === undefined || String(value).trim() === "";
+// Plain decimal numbers only: Number() would also accept "0x48" or "1e3". Anything else becomes NaN,
+// which the schema reports as "must be a number".
+const parseNumber = (value: unknown) => {
+  const text = String(value).trim();
+  return /^-?\d+(\.\d+)?$/.test(text) ? Number(text) : Number.NaN;
+};
+const toNumber = (value: unknown) => (isEmpty(value) ? undefined : parseNumber(value));
+const toNumberOrNull = (value: unknown) => (isEmpty(value) ? null : parseNumber(value));
 
 export function CourseForm({ id, defaultValues, initialImageUrl = null, onSubmit }: CourseFormProps) {
   const navigate = useNavigate();
@@ -51,10 +57,20 @@ export function CourseForm({ id, defaultValues, initialImageUrl = null, onSubmit
     return () => URL.revokeObjectURL(newImageUrl);
   }, [newImageUrl]);
 
+  // The save can resolve after the user has already left (e.g. clicked Cancel and opened another course);
+  // navigating then would pull them out of wherever they are now.
+  const isMounted = useRef(false);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   async function save(values: CourseFormValues) {
     try {
       await onSubmit(values);
-      navigate("/");
+      if (isMounted.current) navigate("/");
     } catch (error) {
       // Stay on the page with everything the user typed.
       toast.error(error instanceof Error ? error.message : "Could not save the course");
@@ -199,11 +215,6 @@ export function CourseForm({ id, defaultValues, initialImageUrl = null, onSubmit
   );
 }
 
-/** Half-typed numbers can be NaN; the card should show its placeholder instead. */
-function finite(value: number | null | undefined) {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
-
 /** Its own component so each keystroke re-renders only the card, not the whole form. */
 function LivePreview({ control, imageUrl }: { control: Control<CourseFormValues>; imageUrl: string | null }) {
   const values = useWatch({ control });
@@ -213,10 +224,10 @@ function LivePreview({ control, imageUrl }: { control: Control<CourseFormValues>
       name={values.name}
       city={values.city}
       country={values.country}
-      par={finite(values.par)}
-      difficulty={finite(values.difficulty)}
-      teeLengthMen={finite(values.teeLengthMen) ?? null}
-      teeLengthWomen={finite(values.teeLengthWomen) ?? null}
+      par={values.par}
+      difficulty={values.difficulty}
+      teeLengthMen={values.teeLengthMen}
+      teeLengthWomen={values.teeLengthWomen}
       imageUrl={imageUrl}
       featured={!!values.featured}
       titleAs="p"
